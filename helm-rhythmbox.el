@@ -125,7 +125,7 @@ formatted with `helm-rhythmbox-candidate-format'."
     (candidates . helm-rhythmbox-candidates)
     (action . (("Play song" . helm-rhythmbox-play-song)
                ("Enqueue song" . helm-rhythmbox-enqueue-song)))
-    (init . (lambda () (when (null rhythmbox-library)
+    (init . (lambda () (unless rhythmbox-library
                     (rhythmbox-load-library))))))
 
 ;;;###autoload
