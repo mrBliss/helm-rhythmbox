@@ -5,6 +5,12 @@ Control [Rhythmbox]'s play queue via [Helm].
 [Helm]: https://github.com/emacs-helm/helm
 [Rhythmbox]: https://wiki.gnome.org/Apps/Rhythmbox
 
+## Installation
+
+Install via [MELPA].
+
+[MELPA]: http://melpa.org
+
 ## Usage
 
 Start by calling `helm-rhythmbox` to browse the library retrieved from a
