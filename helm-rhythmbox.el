@@ -3,7 +3,7 @@
 ;; Copyright (C) 2015 by Thomas Winant
 
 ;; Author: Thomas Winant <dewinant@gmail.com>
-;; URL: https://github.com/mrBliss/helm-rhyhmtbox
+;; URL: https://github.com/mrBliss/helm-rhythmbox
 ;; Version: 0.1
 ;; Package-Requires: ((helm "1.5.0") (cl-lib "0.5"))
 ;; Created: Mar 13 2015
