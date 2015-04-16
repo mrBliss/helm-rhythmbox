@@ -7,6 +7,8 @@ Control [Rhythmbox]'s play queue via [Helm].
 
 ## Installation
 
+[![MELPA](http://melpa.org/packages/helm-rhythmbox-badge.svg)](http://melpa.org/#/helm-rhythmbox)
+
 Install via [MELPA].
 
 [MELPA]: http://melpa.org
