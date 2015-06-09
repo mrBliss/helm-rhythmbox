@@ -120,7 +120,7 @@ formatted with `helm-rhythmbox-candidate-format'."
       (dbus-call-method :session service path interface
                         "AddToQueue" (rhythmbox-song-uri song)))))
 
-(defun helm-rhythmbox-pause-song ()
+(defun helm-rhythmbox-playpause-song ()
   "Play/pause the selected song."
   (interactive)
   (let ((service "org.gnome.Rhythmbox3")
