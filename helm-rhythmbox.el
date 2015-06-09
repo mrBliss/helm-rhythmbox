@@ -120,6 +120,15 @@ formatted with `helm-rhythmbox-candidate-format'."
       (dbus-call-method :session service path interface
                         "AddToQueue" (rhythmbox-song-uri song)))))
 
+(defun helm-rhythmbox-pause-song ()
+  (interactive)
+  "Play/pause the selected song."
+  (let ((service "org.gnome.Rhythmbox3")
+        (path "/org/mpris/MediaPlayer2")
+        (interface "org.mpris.MediaPlayer2.Player"))
+    (dbus-call-method :session service path interface
+                      "PlayPause")))
+
 (defvar helm-source-rhythmbox-track-search
   '((name . "Rhythmbox")
     (candidates . helm-rhythmbox-candidates)
