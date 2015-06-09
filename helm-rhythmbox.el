@@ -121,8 +121,8 @@ formatted with `helm-rhythmbox-candidate-format'."
                         "AddToQueue" (rhythmbox-song-uri song)))))
 
 (defun helm-rhythmbox-pause-song ()
-  (interactive)
   "Play/pause the selected song."
+  (interactive)
   (let ((service "org.gnome.Rhythmbox3")
         (path "/org/mpris/MediaPlayer2")
         (interface "org.mpris.MediaPlayer2.Player"))
