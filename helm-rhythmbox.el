@@ -38,7 +38,7 @@
 (require 'dbus)
 (require 'cl-lib)
 (require 'cl-macs)
-(require' helm)
+(require 'helm)
 
 ;; A struct representing a song retrieved from rhythmbox
 (cl-defstruct rhythmbox-song artist album title uri)
