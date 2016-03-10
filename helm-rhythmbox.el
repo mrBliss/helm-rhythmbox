@@ -41,28 +41,29 @@
 (require 'helm)
 
 ;; A struct representing a song retrieved from rhythmbox
-(cl-defstruct rhythmbox-song artist album title uri)
+(cl-defstruct helm-rhythmbox-song artist album title uri)
 
-(defvar rhythmbox-library nil
+(defvar helm-rhythmbox-library nil
   "Store the library.
-A library consists of a list of `rhythmbox-song' structs representing the
-Rhythmbox's current library.")
+A library consists of a list of `helm-rhythmbox-song' structs
+representing the Rhythmbox's current library.")
 
-(defun rhythmbox-song-from-dbus-item (dbus-item)
-  "Make a `rhythmbox-song' from DBUS-ITEM, a song retrieved via D-Bus."
-  (make-rhythmbox-song :artist (cl-caadr  (assoc "Artist" dbus-item))
+(defun helm-rhythmbox-song-from-dbus-item (dbus-item)
+  "Make a `helm-rhythmbox-song' from DBUS-ITEM.
+DBUS-ITEM is a song retrieved via D-Bus."
+  (make-helm-rhythmbox-song :artist (cl-caadr  (assoc "Artist" dbus-item))
                        :album  (cl-caadr  (assoc "Album" dbus-item))
                        :title  (cl-caadr  (assoc "DisplayName" dbus-item))
                        :uri    (cl-caaadr (assoc "URLs" dbus-item))))
 
-(defun rhythmbox-load-callback (dbus-items)
-  "Callback for `rhythmbox-load-library'.
-Will populate `rhythmbox-library' with DBUS-ITEMS using
-`rhythmbox-song-from-dbus-item'."
-  (setq rhythmbox-library
-        (mapcar #'rhythmbox-song-from-dbus-item dbus-items)))
+(defun helm-rhythmbox-load-callback (dbus-items)
+  "Callback for `helm-rhythmbox-load-library'.
+Will populate `helm-rhythmbox-library' with DBUS-ITEMS using
+`helm-rhythmbox-song-from-dbus-item'."
+  (setq helm-rhythmbox-library
+        (mapcar #'helm-rhythmbox-song-from-dbus-item dbus-items)))
 
-(defun rhythmbox-load-library ()
+(defun helm-rhythmbox-load-library ()
   "Load the Rhythmbox library via D-Bus."
   (let* ((service "org.gnome.Rhythmbox3")
          (path "/org/gnome/UPnP/MediaServer2/Library/all")
@@ -72,36 +73,36 @@ Will populate `rhythmbox-library' with DBUS-ITEMS using
     (if (not nb-songs)
         (error "Couldn't connect to Rhythmbox")
       (dbus-call-method-asynchronously
-       :session service path interface "ListChildren" #'rhythmbox-load-callback
+       :session service path interface "ListChildren" #'helm-rhythmbox-load-callback
        0 nb-songs '("*")))))
 
 (defun helm-rhythmbox-reload-library ()
   "Reload the Rhythmbox library."
   (interactive)
-  (rhythmbox-load-library))
+  (helm-rhythmbox-load-library))
 
 (defun helm-rhythmbox-candidate-default-format (song)
   "Default candidate format function for `helm-rhythmbox'.
 Formats the SONG as \"ARTIST - ALBUM - TITLE\"."
   (format "%s - %s - %s"
-          (rhythmbox-song-artist song)
-          (rhythmbox-song-album song)
-          (rhythmbox-song-title song)))
+          (helm-rhythmbox-song-artist song)
+          (helm-rhythmbox-song-album song)
+          (helm-rhythmbox-song-title song)))
 
 (defvar helm-rhythmbox-candidate-format
   #'helm-rhythmbox-candidate-default-format
   "The function to format a candidate.
-Will get a `rhythmbox-song' struct as input and must output a
-string.  Defaults to `helm-rhythmbox-candidate-format'.")
+Will get a `helm-rhythmbox-song' struct as input and must output
+a string.  Defaults to `helm-rhythmbox-candidate-format'.")
 
 (defun helm-rhythmbox-candidates ()
   "Make the list of candidates for `helm-rhythmbox'.
-The list is composed of the entries in `rhythmbox-library'
+The list is composed of the entries in `helm-rhythmbox-library'
 formatted with `helm-rhythmbox-candidate-format'."
   (mapcar (lambda (song)
             (cons (funcall helm-rhythmbox-candidate-format song)
                   song))
-          rhythmbox-library))
+          helm-rhythmbox-library))
 
 (defun helm-rhythmbox-play-song (song)
   "Let Rhythmbox play the given SONG."
@@ -109,7 +110,7 @@ formatted with `helm-rhythmbox-candidate-format'."
         (path "/org/mpris/MediaPlayer2")
         (interface "org.mpris.MediaPlayer2.Player"))
     (dbus-call-method :session service path interface
-                      "OpenUri" (rhythmbox-song-uri song))))
+                      "OpenUri" (helm-rhythmbox-song-uri song))))
 
 (defun helm-rhythmbox-enqueue-song (_)
   "Let Rhythmbox enqueue the marked songs."
@@ -118,7 +119,7 @@ formatted with `helm-rhythmbox-candidate-format'."
         (interface "org.gnome.Rhythmbox3.PlayQueue"))
     (dolist (song (helm-marked-candidates))
       (dbus-call-method :session service path interface
-                        "AddToQueue" (rhythmbox-song-uri song)))))
+                        "AddToQueue" (helm-rhythmbox-song-uri song)))))
 
 (defun helm-rhythmbox-playpause-song ()
   "Play/pause the selected song."
@@ -134,8 +135,8 @@ formatted with `helm-rhythmbox-candidate-format'."
     :candidates #'helm-rhythmbox-candidates
     :action  '(("Play song" . helm-rhythmbox-play-song)
                ("Enqueue song" . helm-rhythmbox-enqueue-song))
-    :init (lambda () (unless rhythmbox-library
-                  (rhythmbox-load-library))))
+    :init (lambda () (unless helm-rhythmbox-library
+                  (helm-rhythmbox-load-library))))
   "Helm source for searching Rhythmbox tracks.")
 
 ;;;###autoload
