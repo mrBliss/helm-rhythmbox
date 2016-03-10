@@ -1,4 +1,4 @@
-;;; helm-rhythmbox.el --- control Rhythmbox's play queue via Helm
+;;; helm-rhythmbox.el --- control Rhythmbox's play queue via Helm -*-lexical-binding: t-*-
 
 ;; Copyright (C) 2015 by Thomas Winant
 
