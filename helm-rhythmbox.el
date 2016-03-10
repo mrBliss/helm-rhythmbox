@@ -130,12 +130,13 @@ formatted with `helm-rhythmbox-candidate-format'."
                       "PlayPause")))
 
 (defvar helm-source-rhythmbox-track-search
-  '((name . "Rhythmbox")
-    (candidates . helm-rhythmbox-candidates)
-    (action . (("Play song" . helm-rhythmbox-play-song)
-               ("Enqueue song" . helm-rhythmbox-enqueue-song)))
-    (init . (lambda () (unless rhythmbox-library
-                    (rhythmbox-load-library))))))
+  (helm-build-sync-source "Rhythmbox"
+    :candidates #'helm-rhythmbox-candidates
+    :action  '(("Play song" . helm-rhythmbox-play-song)
+               ("Enqueue song" . helm-rhythmbox-enqueue-song))
+    :init (lambda () (unless rhythmbox-library
+                  (rhythmbox-load-library))))
+  "Helm source for searching Rhythmbox tracks.")
 
 ;;;###autoload
 (defun helm-rhythmbox ()
