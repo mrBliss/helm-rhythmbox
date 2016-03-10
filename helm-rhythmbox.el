@@ -52,8 +52,24 @@ a string.  Defaults to `helm-rhythmbox-candidate-format'.")
 A library consists of a list of `helm-rhythmbox-song' structs
 representing the Rhythmbox's current library.")
 
-;; A struct representing a song retrieved from rhythmbox
-(cl-defstruct helm-rhythmbox-song artist album title uri)
+(cl-defstruct (helm-rhythmbox-song
+               (:constructor helm-rhythmbox-song-new
+                             (artist album title uri)))
+  "Structure representing a song retrieved from Rhythmbox.
+Slots:
+
+`artist'
+     The artist of the song.
+
+`album'
+     The album containing the song.
+
+`title'
+     The title of the song.
+
+`uri'
+     The URI of the song, used by Rhythmbox as identifier."
+  artist album title uri)
 
 (defun helm-rhythmbox-candidate-default-format (song)
   "Default candidate format function for `helm-rhythmbox'.
@@ -75,10 +91,11 @@ formatted with `helm-rhythmbox-candidate-format'."
 (defun helm-rhythmbox-song-from-dbus-item (dbus-item)
   "Make a `helm-rhythmbox-song' from DBUS-ITEM.
 DBUS-ITEM is a song retrieved via D-Bus."
-  (make-helm-rhythmbox-song :artist (cl-caadr  (assoc "Artist" dbus-item))
-                       :album  (cl-caadr  (assoc "Album" dbus-item))
-                       :title  (cl-caadr  (assoc "DisplayName" dbus-item))
-                       :uri    (cl-caaadr (assoc "URLs" dbus-item))))
+  (helm-rhythmbox-song-new
+   (cl-caadr  (assoc "Artist" dbus-item))
+   (cl-caadr  (assoc "Album" dbus-item))
+   (cl-caadr  (assoc "DisplayName" dbus-item))
+   (cl-caaadr (assoc "URLs" dbus-item))))
 
 (defun helm-rhythmbox-load-callback (dbus-items)
   "Callback for `helm-rhythmbox-load-library'.
