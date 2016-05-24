@@ -32,6 +32,11 @@
 ;;
 ;; The whole library is retrieved on first use and can be reloaded
 ;; with `helm-rhythmbox-reload-library'.
+;;
+;; Note that candidates formatted with `helm-rhythmbox-candidate-format' are
+;; cached, so to see the effect of changing `helm-rhythmbox-candidate-format'
+;; (after already having loaded the library) requires reloading the library to
+;; reset the cache.
 
 ;;; Code:
 
@@ -47,10 +52,11 @@
 Will get a `helm-rhythmbox-song' struct as input and must output
 a string.  Defaults to `helm-rhythmbox-candidate-format'.")
 
-(defvar helm-rhythmbox-library nil
-  "Store the library.
-A library consists of a list of `helm-rhythmbox-song' structs
-representing the Rhythmbox's current library.")
+(defvar helm-rhythmbox--cache nil
+  "Store a list of cached candidates for `helm-rhythmbox'.
+A candidate is of the format (DISPLAY . SONG), where SONG is a
+`helm-rhythmbox-song' structure, and DISPLAY is the result
+of (funcall helm-rhythmbox-candidate-format SONG).")
 
 (cl-defstruct (helm-rhythmbox-song
                (:constructor helm-rhythmbox-song-new
@@ -79,15 +85,6 @@ Formats the SONG as \"ARTIST - ALBUM - TITLE\"."
           (helm-rhythmbox-song-album song)
           (helm-rhythmbox-song-title song)))
 
-(defun helm-rhythmbox-candidates ()
-  "Make the list of candidates for `helm-rhythmbox'.
-The list is composed of the entries in `helm-rhythmbox-library'
-formatted with `helm-rhythmbox-candidate-format'."
-  (mapcar (lambda (song)
-            (cons (funcall helm-rhythmbox-candidate-format song)
-                  song))
-          helm-rhythmbox-library))
-
 (defun helm-rhythmbox-song-from-dbus-item (dbus-item)
   "Make a `helm-rhythmbox-song' from DBUS-ITEM.
 DBUS-ITEM is a song retrieved via D-Bus."
@@ -99,10 +96,15 @@ DBUS-ITEM is a song retrieved via D-Bus."
 
 (defun helm-rhythmbox-load-callback (dbus-items)
   "Callback for `helm-rhythmbox-load-library'.
-Will populate `helm-rhythmbox-library' with DBUS-ITEMS using
-`helm-rhythmbox-song-from-dbus-item'."
-  (setq helm-rhythmbox-library
-        (mapcar #'helm-rhythmbox-song-from-dbus-item dbus-items)))
+Will populate `helm-rhythmbox--cache' with DBUS-ITEMS using
+`helm-rhythmbox-song-from-dbus-item' and
+`helm-rhythmbox-candidate-format'."
+  (setq helm-rhythmbox--cache
+        (mapcar (lambda (dbus-item)
+                  (let ((song (helm-rhythmbox-song-from-dbus-item dbus-item)))
+                    (cons (funcall helm-rhythmbox-candidate-format song)
+                          song)))
+                dbus-items)))
 
 (defun helm-rhythmbox-load-library ()
   "Load the Rhythmbox library via D-Bus."
@@ -150,10 +152,10 @@ Will populate `helm-rhythmbox-library' with DBUS-ITEMS using
 
 (defvar helm-source-rhythmbox-track-search
   (helm-build-sync-source "Rhythmbox"
-    :candidates #'helm-rhythmbox-candidates
+    :candidates 'helm-rhythmbox--cache
     :action  '(("Play song" . helm-rhythmbox-play-song)
                ("Enqueue song" . helm-rhythmbox-enqueue-song))
-    :init (lambda () (unless helm-rhythmbox-library
+    :init (lambda () (unless helm-rhythmbox--cache
                   (helm-rhythmbox-load-library))))
   "Helm source for searching Rhythmbox tracks.")
 
